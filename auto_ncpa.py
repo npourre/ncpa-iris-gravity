@@ -47,7 +47,7 @@ if __name__ == '__main__':
     print("Launch IRIS/SC acquisition and GPAO disturbance")
     print("################")
     if args.inst == "IRIS":
-        duration_acq = ((args.timepermode+0.5) * args.repeat) + 2 + 20
+        duration_acq = (((args.timepermode+0.5) * args.repeat) + 2) / 1.5 + 20 # IRIS with DIT of 1 ms has a 1.5 ms frame rate
         os.system('python 2_iris_ncpa.py {0} {1} {2} -d {3}'.format(args.tel, args.mode, args.floop, duration_acq ))
     elif args.inst == "GRAV":
         duration_acq = ((args.timepermode+1) * args.repeat) + 30
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     print("################")
     print("Process IRIS/SC images to extract NCPA")
     print("################")
-    time.sleep(15)
+    time.sleep(25)
     if args.inst == "IRIS":
         os.system('python 3_process_ncpa.py {0} {1} {2} {3} {4} --timepermode {5}'.format(args.tel, args.mode, args.amplitude_slow, args.repeat, args.floop, args.timepermode))
     elif args.inst == "GRAV":

@@ -58,7 +58,7 @@ def extract_ncpa_iris(cube_1ut, nZ, nRtcMod, nRtcPause, modAmp):
     mix_f = mix_f[500:-500] # might cause problems
     nSample = mix_f.shape[0]
 
-    mix_f = mix_f - np.median(mix_f)
+    mix_f = mix_f - np.median(mix_f[-1000:])
     
     #Mix and filter to extract 2F modulation amplitude
     mix_2f = flux*np.exp(1j*2*np.pi*2*f*t)
