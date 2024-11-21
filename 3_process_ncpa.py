@@ -40,10 +40,8 @@ if __name__ == '__main__':
     out = os.popen('scp 3b_process_probe.py aral@waral:/vltuser/aral/npourre/')
     print(out)
     wgv = vlti.ssh("aral@waral")
-    print('COUCOU_1')
     wgv._ssh("python /vltuser/aral/npourre/3b_process_probe.py {0} {1} {2} {3} {4} {5}".format(args.tel, args.noll, args.timepermode, args.amplitude, args.repeat, args.floop))
     time.sleep(1) #sleep more?
-    print('COUCOU_2')
     
     out = os.popen('scp aral@waral:/vltuser/aral/npourre/NCPA_* data/outputs/')
     print(out)
@@ -103,8 +101,8 @@ if __name__ == '__main__':
         fig, axarr = plt.subplots(2, 2, figsize=(12,8))
         for indTel in range(4):
             for iZ in range(args.repeat):
-                xStart = iStartArr[indTel]+iZ*(nMeasureArr[indTel]+3*nPauseArr[indTel]) + nPauseArr[indTel]*1.5
-                xStop = iStartArr[indTel]+iZ*(nMeasureArr[indTel]+3*nPauseArr[indTel]) + nPauseArr[indTel]*1.5 + nMeasureArr[indTel]
+                xStart = iStartArr[indTel]+iZ*(nMeasureArr[indTel]+nPauseArr[indTel]) + nPauseArr[indTel]*2
+                xStop = iStartArr[indTel]+iZ*(nMeasureArr[indTel]+nPauseArr[indTel]) + nPauseArr[indTel]*2 + nMeasureArr[indTel]
                 axarr.ravel()[indTel].add_patch(patches.Rectangle((xStart,0), xStop-xStart,  np.max(mix_f_Arr[indTel])/2, alpha=0.2, color='grey'))
                 axarr.ravel()[indTel].text((xStart+xStop)/2.0,  np.max(mix_f_Arr[indTel])/2, 'Z{0}'.format(args.noll), va='top', ha='center')
             axarr.ravel()[indTel].plot(mix_f_Arr[indTel])
@@ -121,8 +119,8 @@ if __name__ == '__main__':
     elif (args.tel in [1,2,3,4]) and ncpaArr.shape[0]==1: #one UT measurement
         fig, axarr = plt.subplots(1, 1, figsize=(8,6))
         for iZ in range(args.repeat):
-            xStart = iStartArr[0]+iZ*(nMeasureArr[0]+3*nPauseArr[0]) + nPauseArr[0]*1.5
-            xStop = iStartArr[0]+iZ*(nMeasureArr[0]+3*nPauseArr[0]) + nMeasureArr[0] + nPauseArr[0]*1.5
+            xStart = iStartArr[0]+iZ*(nMeasureArr[0]+nPauseArr[0]) + nPauseArr[0]*2
+            xStop = iStartArr[0]+iZ*(nMeasureArr[0]+nPauseArr[0]) + nMeasureArr[0] + nPauseArr[0]*2
             axarr.add_patch(patches.Rectangle((xStart,0), xStop-xStart, np.max(mix_f_Arr[0])/2, alpha=0.2, color='grey'))
             axarr.text((xStart+xStop)/2.0, np.max(mix_f_Arr[0])/2, 'Z{0}'.format(args.noll), va='top', ha='center')
         axarr.plot(mix_f_Arr[0])
