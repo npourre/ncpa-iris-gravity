@@ -21,7 +21,7 @@ from astropy.io import fits
 import numpy as np
 from scipy import linalg as la
 
-def generate_disturb(iTel, period, amplitude_fast, amplitude_slow, f, f_fast, margin, mode_noll):
+def generate_disturb(iTel, period, repeat,amplitude_fast, amplitude_slow, f, f_fast, margin, mode_noll):
 	# Load M2S matrix
 	M2S_filename = 'data/MODE2SLOPE{0}.fits'.format(iTel)
 	with fits.open(M2S_filename) as hdulist:
@@ -40,17 +40,16 @@ def generate_disturb(iTel, period, amplitude_fast, amplitude_slow, f, f_fast, ma
 	# Create fundamental modulation
 	modulation = amplitude_slow*np.sin(2.0*np.pi*np.arange(period)/(period/2)) + amplitude_fast*np.sin(2.0*np.pi*np.arange(period)/f*f_fast)
 	
-	focus_flash_length = margin//2
+	focus_flash_length = margin
 	focus_flash = 0.2*np.sin(2.0*np.pi*np.arange(focus_flash_length)/f*f_fast)
 	amp_focus_flash =0.2
 	
 	# Create sequence
-	Z = np.zeros(((focus_flash_length+margin+period+margin+focus_flash_length), scr_M2S.shape[1]))
-	iZ = 2
+	Z = np.zeros((int(focus_flash_length+(margin+period)*repeat+margin+focus_flash_length), scr_M2S.shape[1]))
 	Z[:focus_flash_length,2]= focus_flash+amp_focus_flash
 	Z[-focus_flash_length:,2]= focus_flash+amp_focus_flash
-
-	Z[margin+focus_flash_length:focus_flash_length+margin+period, mode_noll-2] = modulation
+	for i in range(repeat):
+		Z[focus_flash_length+int(margin)+int(margin+period)*i:focus_flash_length+int(margin+period)*(i+1), mode_noll-2] = modulation
 	S = (scr_M2S @ Z.T).T
 
 	hdulist = fits.HDUList([fits.PrimaryHDU(S.astype(np.float32))])
@@ -62,6 +61,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="Generate the disturbance matrices")
 	parser.add_argument('tel', type=int, choices=range(5), help="Telescope index. 0 for all telescopes")
 	parser.add_argument('mode', type=int , help="mode Noll index")
+	parser.add_argument('repeat', type=int , help="number of repetition for the measurement")
 	parser.add_argument('floop', type=int , help="AO loop frequency")
 	parser.add_argument('--timepermode','-t',type=int,default=4, help='time permode (sec)')
 	parser.add_argument('--amplitude_fast','-a',type=float,default=0.2, help='Amplitude of fast modulation [µm]')
@@ -71,8 +71,8 @@ if __name__ == '__main__':
 	# Disturbances parameters
 	f = args.floop # loop rate in Hz
 	f_fast = 25  # [Hz]
-	margin_t = 1 # in sec
-	margin = margin_t * f #in loop cycle
+	margin_t = 0.5 # in sec
+	margin = int(margin_t * f) #in loop cycle
 	period = args.timepermode * f
 	amplitude_fast = args.amplitude_fast
 	amplitude_slow = args.amplitude_slow
@@ -80,13 +80,13 @@ if __name__ == '__main__':
 
 	if args.tel==0: #all UTs measurements
 		for iTel in range(1,5):
-			generate_disturb(iTel, period, amplitude_fast, amplitude_slow, f, f_fast, margin, mode_noll)
+			generate_disturb(iTel, period,args.repeat, amplitude_fast, amplitude_slow, f, f_fast, margin, mode_noll)
 	elif args.tel in [1,2,3,4]: #one UT measurement
-		generate_disturb(args.tel, period, amplitude_fast, amplitude_slow, f, f_fast, margin, mode_noll)
+		generate_disturb(args.tel, period,args.repeat, amplitude_fast, amplitude_slow, f, f_fast, margin, mode_noll)
 	else:
 		print("WRONG TELESCOPE NUMBER")
 
-	print("One modulation element will last {0} s".format((period+3*margin)/f))
+	print("Modulation element will last {0} s".format(((period+margin)*args.repeat+3*margin)/f))
 
 
 
