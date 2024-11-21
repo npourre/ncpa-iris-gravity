@@ -75,14 +75,14 @@ def extract_ncpa_iris(cube_1ut, nZ, nRtcMod, nRtcPause, modAmp):
     # Find beginning and end of modulation
     iStart, iStop = np.where(mix_f > threshold)[0][[0, -1]]
     # Compute sample count for a measurement and a pause
-    nMeasure = (iStop-iStart)/(nRtcMod*nZ+3*nRtcPause*(nZ))*nRtcMod
-    nPause = (iStop-iStart)/(nRtcMod*nZ+3*nRtcPause*(nZ))*nRtcPause
+    nMeasure = (iStop-iStart) * nRtcMod / ((nRtcMod+nRtcPause)*nZ+3*nRtcPause)
+    nPause = (iStop-iStart) * nRtcPause / ((nRtcMod+nRtcPause)*nZ+3*nRtcPause)
 
     # Compute NCPA
     ncpa = []
     for iZ in range(nZ):
         # Extract 1.f modulation amplitude for current Zernike
-        measure = mix_f[iStart+int(1.5*nPause+iZ*(nMeasure+nPause*3)):iStart+int(1.5*nPause+nMeasure+iZ*(nMeasure+nPause*3))]
+        measure = mix_f[int(iStart+2*nPause+iZ*(nMeasure+nPause)):int(iStart+2*nPause+nMeasure+iZ*(nMeasure+nPause))]
         # Extract intervals where the three central minima are expected
         n = int(len(measure)/8+0.5)
         a = measure[1*n:3*n]
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     #Parameters (same as modulation)
     nZ = args.repeat  # Number of repetitions
     nRtcMod = args.timepermode * args.floop  # Number of RTC samples for one Zernike modulation
-    nRtcPause = args.floop  # Number of RTC samples for a pause between two modulations
+    nRtcPause = int(0.5* args.floop)  # Number of RTC samples for a pause between two modulations
     modAmp = args.amplitude_slow
     
     #Read IRIS data cube
