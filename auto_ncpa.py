@@ -41,14 +41,14 @@ if __name__ == '__main__':
     print("################")
     print("Generate perturbation element")
     print("################")
-    os.system('python 1_generate_disturbance_files.py {0} {1} {2} -t {3} -a {4} -s {5}'.format(args.tel, args.mode, args.floop, args.timepermode, args.amplitude_fast, args.amplitude_slow))
+    os.system('python 1_generate_disturbance_files.py {0} {1} {2} {3} -t {4} -a {5} -s {6}'.format(args.tel, args.mode, args.repeat, args.floop, args.timepermode, args.amplitude_fast, args.amplitude_slow))
     
     print("################")
     print("Launch IRIS/SC acquisition and GPAO disturbance")
     print("################")
     if args.inst == "IRIS":
-        duration_acq = ((args.timepermode+1) * args.repeat) + 20
-        os.system('python 2_iris_ncpa.py {0} {1} {2} {3} -d {4}'.format(args.tel, args.mode, args.repeat, args.floop, duration_acq ))
+        duration_acq = ((args.timepermode+0.5) * args.repeat) + 2 + 20
+        os.system('python 2_iris_ncpa.py {0} {1} {2} -d {3}'.format(args.tel, args.mode, args.floop, duration_acq ))
     elif args.inst == "GRAV":
         duration_acq = ((args.timepermode+1) * args.repeat) + 30
         os.system('python 2_modulation_acq.py {0} {1} {2} {4} -d {3} -b {5} -i 0.01'.format(args.tel, args.mode, args.repeat, duration_acq, args.floop ,args.background))
