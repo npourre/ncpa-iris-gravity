@@ -86,7 +86,7 @@ if __name__ == '__main__':
 	else:
 		print("WRONG TELESCOPE NUMBER")
 
-	print("Modulation element will last {0} s".format(((period+margin)*args.repeat+3*margin)/f))
+	print("Modulation will last {0} s".format(((period+margin)*args.repeat+3*margin)/f))
 
 
 

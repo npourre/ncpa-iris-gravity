@@ -6,10 +6,10 @@ import vlti
 
 ## LAUNCH FROM ISS
 
-def prep_gpao(iTel, mode, floop, repeat):
+def prep_gpao(iTel, mode, floop):
     wgpNao = vlti.ssh("gpao{0}@wgp{0}ao".format(iTel))
     wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "\"HOAcqDisturb.FILENAME $INS_ROOT/SYSTEM/SPARTA/RTCDATA/NcpaModulation_noll{0}_tel{1}_f{2}.fits\"".format(mode,iTel,floop),verbose=True)
-    wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "HOAcqDisturb.CYCLES\ {0}".format(repeat),verbose=True)
+    wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "HOAcqDisturb.CYCLES\ 1",verbose=True)
     wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "HOAcqDisturb.START_AT_FC\ 0",verbose=True)
 
 def start_modul(iTel):
@@ -20,7 +20,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Record IRIS data cube for NCPA")
     parser.add_argument('tel', type=int, choices=range(5), help="Telescope index; use 0 for all four at once.")
     parser.add_argument('mode', type=int , help="mode Noll index")
-    parser.add_argument('repeat', type=int , help="number of repetition")
     parser.add_argument('floop', type=int , help="AO loop frequency")
     parser.add_argument('--duration', '-d', type=float, default=30.0)
     args = parser.parse_args()
@@ -78,9 +77,9 @@ if __name__ == '__main__':
     # Prepare GPAO(s)
     if args.tel==0: #all UTs measurements
         for iTel in range(1,5):
-            prep_gpao(iTel, args.mode, args.floop, args.repeat)
+            prep_gpao(iTel, args.mode, args.floop)
     elif args.tel in [1,2,3,4]: #one UT measurement
-        prep_gpao(args.tel, args.mode, args.floop, args.repeat)
+        prep_gpao(args.tel, args.mode, args.floop)
     else:
         print("WRONG TELESCOPE NUMBER")
 
