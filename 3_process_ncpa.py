@@ -31,16 +31,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process NCPA files")
     parser.add_argument('tel', type=int, choices=range(5), help="Telescope index; use 0 for all four at once.")
     parser.add_argument('noll', type=int, help="noll index of the modulation ")
-    parser.add_argument('amplitude',type=float,default=0.2, help='Amplitude of the slow modulation ramp [µm]')
     parser.add_argument('repeat', type=int, help="number of repetition for the modulation ")
     parser.add_argument('floop', type=int , help="AO loop frequency")
     parser.add_argument('--timepermode','-t',type=int,default=4, help='time permode (sec)')
     args = parser.parse_args()
     
+    amplitude_slow = 0.2 #µm rms
     out = os.popen('scp 3b_process_probe.py aral@waral:/vltuser/aral/npourre/')
     print(out)
     wgv = vlti.ssh("aral@waral")
-    wgv._ssh("python /vltuser/aral/npourre/3b_process_probe.py {0} {1} {2} {3} {4} {5}".format(args.tel, args.noll, args.timepermode, args.amplitude, args.repeat, args.floop))
+    wgv._ssh("python /vltuser/aral/npourre/3b_process_probe.py {0} {1} {2} {3} {4} {5}".format(args.tel, args.noll, args.timepermode, amplitude_slow, args.repeat, args.floop))
     time.sleep(1) #sleep more?
     
     out = os.popen('scp aral@waral:/vltuser/aral/npourre/NCPA_* data/outputs/')

@@ -17,9 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('floop', type=int , help="AO loop frequency")
     parser.add_argument('inst', type=str , help="IRIS or GRAV")
     parser.add_argument('--background','-b', type=int,default=1 , help="Do we record a background or not. 0/1")
-    parser.add_argument('--timepermode','-t',type=int,default=4, help='time permode (sec)')
-    parser.add_argument('--amplitude_fast','-a',type=float,default=0.2, help='Amplitude of fast modulation [µm]')
-    parser.add_argument('--amplitude_slow','-s',type=float,default=0.2, help='Amplitude of slow modulation [µm]')
+    parser.add_argument('--timepermode','-t',type=int,default=1.5, help='time permode (sec)')
     parser.add_argument('--get_matrices','-m',type=int, default=1, help="Do we fetch SPARTA matrices. O/1")
     args = parser.parse_args()
     
@@ -29,7 +27,7 @@ if __name__ == '__main__':
         utstr =str(args.tel)
     else:
         print("WRONG TELESCOPE NUMBER")
-    print("CORRECTING NOLL {0} on UT{1} with {2} repetitions for the modulation, {3} seconds per modulation element of {4}µm-rms amplitude for the ramp".format(args.mode,utstr,args.repeat,args.timepermode,args.amplitude_slow))
+    print("CORRECTING NOLL {0} on UT{1} with {2} repetitions for the modulation, {3} seconds per modulation element".format(args.mode,utstr,args.repeat,args.timepermode))
     if args.get_matrices==1:
         print("################")
         print("Get matrices")
@@ -41,14 +39,14 @@ if __name__ == '__main__':
     print("################")
     print("Generate perturbation element")
     print("################")
-    os.system('python 1_generate_disturbance_files.py {0} {1} {2} {3} -t {4} -a {5} -s {6}'.format(args.tel, args.mode, args.repeat, args.floop, args.timepermode, args.amplitude_fast, args.amplitude_slow))
+    os.system('python 1_generate_disturbance_files.py {0} {1} {2} {3} -t {4}'.format(args.tel, args.mode, args.repeat, args.floop, args.timepermode))
     
     print("################")
     print("Launch IRIS/SC acquisition and GPAO disturbance")
     print("################")
     if args.inst == "IRIS":
         duration_acq = (((args.timepermode+0.5) * args.repeat) + 2) / 1.5 + 20 # IRIS with DIT of 1 ms has a 1.5 ms frame rate
-        os.system('python 2_iris_ncpa.py {0} {1} {2} -d {3}'.format(args.tel, args.mode, args.floop, duration_acq ))
+        os.system('python 2_iris_ncpa.py {0} {1} {2} -d {3} -b {4}'.format(args.tel, args.mode, args.floop, duration_acq, args.background ))
     elif args.inst == "GRAV":
         duration_acq = ((args.timepermode+1) * args.repeat) + 30
         os.system('python 2_modulation_acq.py {0} {1} {2} {4} -d {3} -b {5} -i 0.01'.format(args.tel, args.mode, args.repeat, duration_acq, args.floop ,args.background))
@@ -61,7 +59,7 @@ if __name__ == '__main__':
     print("################")
     time.sleep(25)
     if args.inst == "IRIS":
-        os.system('python 3_process_ncpa.py {0} {1} {2} {3} {4} --timepermode {5}'.format(args.tel, args.mode, args.amplitude_slow, args.repeat, args.floop, args.timepermode))
+        os.system('python 3_process_ncpa.py {0} {1} {2} {3} {4} --t {5}'.format(args.tel, args.mode, args.repeat, args.floop, args.timepermode))
     elif args.inst == "GRAV":
         os.system('python 3_process_ncpa_grav.py {0} {1} {2} {3}'.format(args.mode, args.amplitude_slow, args.repeat, args.floop))
     else:
