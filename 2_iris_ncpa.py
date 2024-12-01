@@ -81,6 +81,6 @@ if __name__ == '__main__':
         wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "EXEC", "HOAcqDisturb.run",verbose=True)
 
     # Wait for the duration of the measurement
-    time.sleep(args.duration)
+    #time.sleep(args.duration)
 
 

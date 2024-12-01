@@ -87,4 +87,4 @@ if __name__ == '__main__':
         print('Wrong telescope number')
 
     # Wait for the duration of the measurement
-    time.sleep(args.duration)
+    #time.sleep(args.duration)

@@ -9,6 +9,17 @@ import os
 import argparse
 import time
 from datetime import datetime
+import subprocess
+
+def exists_remote(host, path):
+    """Test if a file exists at path on a host accessible with SSH."""
+    status = subprocess.call(
+        ['ssh', host, 'test -f {}'.format(shlex.quote(path))])
+    if status == 0:
+        return True
+    if status == 1:
+        return False
+    raise Exception('SSH failed')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate the disturbance matrices")
@@ -18,17 +29,17 @@ if __name__ == '__main__':
     parser.add_argument('floop', type=int , help="AO loop frequency")
     parser.add_argument('inst', type=str , help="IRIS or GRAV")
     parser.add_argument('--background','-b', type=int,default=1 , help="Do we record a background or not. 0/1")
-    parser.add_argument('--timepermode','-t',type=int,default=1.5, help='time permode (sec)')
+    parser.add_argument('--timepermode','-t',type=float,default=1.5, help='time permode (sec)')
     parser.add_argument('--get_matrices','-m',type=int, default=1, help="Do we fetch SPARTA matrices. O/1")
     args = parser.parse_args()
     
     if args.tel==0:
-        utstr="1234"
+        ut_str="1234"
     elif args.tel in [1,2,3,4]: #one UT measurement
-        utstr =str(args.tel)
+        ut_str =str(args.tel)
     else:
         print("WRONG TELESCOPE NUMBER")
-    print("CORRECTING NOLL {0} on UT{1} with {2} repetitions for the modulation, {3} seconds per modulation element".format(args.mode,utstr,args.repeat,args.timepermode))
+    print("CORRECTING NOLL {0} on UT{1} with {2} repetitions for the modulation, {3} seconds per modulation element".format(args.mode,ut_str,args.repeat,args.timepermode))
     if args.get_matrices==1:
         print("################")
         print("Get matrices")
@@ -61,10 +72,24 @@ if __name__ == '__main__':
     print("################")
     print("Process IRIS/SC images to extract NCPA")
     print("################")
-    time.sleep(25)
+    timeout_time = 300 #s
     if args.inst == "IRIS":
+        #Wait for file on the remote server
+        start_time = time.time()
+        while not exists_remote('aral@waral', '$INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits'.format(name_acquisition)):
+            time.sleep(1)
+            if (time.time()-start_time) > timeout_time:
+                raise RuntimeError('Maximal waiting time reached')
+        print("File found!")
         os.system('python 3_process_ncpa_iris.py {0} {1} {2} {3} {4} -t {5}'.format(args.tel, args.mode, args.repeat, args.floop, name_acquisition, args.timepermode))
     elif args.inst == "GRAV":
+        #Wait for file on the remote server
+        start_time = time.time()
+        while not exists_remote('grav@wgv', "$INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits".format(name_acquisition)):
+            time.sleep(1)
+            if (time.time()-start_time) > timeout_time:
+                raise RuntimeError('Maximal waiting time reached')
+        print("File found!")
         os.system('python 3_process_ncpa_grav.py {0} {1} {2} {3} -t {4}'.format(args.mode, args.repeat, args.floop, name_acquisition, args.timepermode))
     else:
         print("WRONG INSTRUMENT NAME")
