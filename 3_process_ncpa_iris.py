@@ -53,10 +53,6 @@ def extract_ncpa_iris(cube_1ut, nZ, nRtcMod, nRtcPause, modAmp):
     i_ff = np.argmax(psd[2*i_f-i_f//2:2*i_f+i_f//2])
     ff = freq[i_ff+2*i_f-i_f//2]
     f = ff/2.0
-
-    #plt.figure()
-    #plt.plot(psd)
-    #plt.show()
     
     #Mix and filter to extract 1F modulation amplitude
     t = np.arange(flux.shape[-1])
@@ -114,7 +110,7 @@ if __name__ == '__main__':
     parser.add_argument('noll', type=int, help="noll index of the modulation ")
     parser.add_argument('repeat', type=int, help="number of repetition for the modulation ")
     parser.add_argument('floop', type=int , help="AO loop frequency")
-    parser.add_argument('name_acquisition', type=str, help="name of the modulation")
+    parser.add_argument('name_acquisition', type=str, help="name of the acquisition")
     parser.add_argument('--timepermode','-t',type=int,default=4, help='time permode (sec)')
     args = parser.parse_args()
     
@@ -135,9 +131,9 @@ if __name__ == '__main__':
     temp_folder = "/user/temp_ncpa/" # for tmporary storage of IRIS/GRAV data
 
     # Transfer Iris acquisition to ISS
-    os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits |grep -v / | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(args.name_acquisition, temp_folder))
+    os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(args.name_acquisition, temp_folder))
     # Transfer lastest Iris background to ISS
-    os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/IrisNcpa_*bckg*_DIT.fits |grep -v / | grep -m1 \"\""); scp aral@waral:$FILE {0} """.format(temp_folder))
+    os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/IrisNcpa_*bckg*_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {0} """.format(temp_folder))
 
     filename = temp_folder + args.name_acquisition + '_DIT.fits'
     bckgname = sorted(glob.glob(temp_folder+'IrisNcpa_*bckg*.fits'))[-1]
@@ -179,7 +175,7 @@ if __name__ == '__main__':
     nSample = np.array(nSample_tot) 
     mix_f_Arr = np.array(mix_f_tot)
 
-    np.save('NCPA_{0}.npy'.format(name_acquisition), ncpa_tot)
+    np.save('{0}NCPA_{1}.npy'.format(temp_folder,args.name_acquisition), ncpa_tot)
 
     # Plot NCPA
     if args.tel==0 and ncpaArr.shape[0]==4: #4 UTs at once

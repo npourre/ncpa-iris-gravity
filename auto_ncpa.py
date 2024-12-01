@@ -45,14 +45,15 @@ if __name__ == '__main__':
     print("################")
     print("Launch IRIS/SC acquisition and GPAO disturbance")
     print("################")
+    tStart = datetime.utcnow().isoformat()[:-7]
     if args.inst == "IRIS":
-        tStart = datetime.utcnow().isoformat()[:-7]
         name_acquisition = "IrisNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str)
         duration_acq = (((args.timepermode+0.5) * args.repeat) + 1.5) + 10 
         os.system('python 2_iris_ncpa.py {0} {1} {2} {3} -d {4} -b {5}'.format(args.tel, args.mode, args.floop, name_acquisition, duration_acq, args.background ))
     elif args.inst == "GRAV":
-        duration_acq = ((args.timepermode+1) * args.repeat) + 30
-        os.system('python 2_modulation_acq.py {0} {1} {2} {4} -d {3} -b {5} -i 0.01'.format(args.tel, args.mode, args.repeat, duration_acq, args.floop ,args.background))
+        name_acquisition = "GravNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str)
+        duration_acq = (((args.timepermode+0.5) * args.repeat) +1.5) + 10
+        os.system('python 2_modulation_acq.py {0} {1} {2} {3} -d {4} -b {5} -i 0.01'.format(args.tel, args.mode, args.repeat, args.floop, name_acquisition, duration_acq, args.background))
     else:
         print("WRONG INSTRUMENT NAME")
         raise ValueError('INST not known')
@@ -64,7 +65,7 @@ if __name__ == '__main__':
     if args.inst == "IRIS":
         os.system('python 3_process_ncpa_iris.py {0} {1} {2} {3} {4} -t {5}'.format(args.tel, args.mode, args.repeat, args.floop, name_acquisition, args.timepermode))
     elif args.inst == "GRAV":
-        os.system('python 3_process_ncpa_grav.py {0} {1} {2} {3}'.format(args.mode, args.amplitude_slow, args.repeat, args.floop))
+        os.system('python 3_process_ncpa_grav.py {0} {1} {2} {3} -t {4}'.format(args.mode, args.repeat, args.floop, name_acquisition, args.timepermode))
     else:
         print("WRONG INSTRUMENT NAME")
         raise ValueError('INST not known')    
@@ -73,4 +74,4 @@ if __name__ == '__main__':
     print("Apply NCPA")
     print("################")
     time.sleep(1)
-    os.system('python 4_apply_ncpa.py {0} {1}'.format(args.tel, args.mode))
+    os.system('python 4_apply_ncpa.py {0} {1} {2}'.format(args.tel, args.mode, name_acquisition))

@@ -41,10 +41,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Apply NCPA")
     parser.add_argument('tel', type=int, choices=range(5), help="Telescope index; use 0 for all four at once.")
     parser.add_argument('noll', type=int, help="noll index of the modulation ")
+    parser.add_argument('name_acquisition', type=str, help="name of the IRIS acquisition")
     args = parser.parse_args()
     
+    tStart = args.name_acquisition.split('_')[1]
     #get the last NCPA file
-    ncpa_file = sorted(glob.glob('/user/temp_ncpa/NCPA_*.npy'))[-1]
+    ncpa_file = sorted(glob.glob('/user/temp_ncpa/NCPA_*{0}*.npy'.format(tStart)))[-1]
     print('Applying {0} '.format(ncpa_file))
     ncpa_offset = -np.load(ncpa_file)
 

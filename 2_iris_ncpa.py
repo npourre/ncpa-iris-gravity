@@ -41,7 +41,8 @@ if __name__ == '__main__':
         waral.send("''", "iracqServer", "SETUP", ",,DET.NDIT\ {0}".format(100))
         waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
         waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming",verbose=True)
-        waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_bckg".format(args.name_acquisition),verbose=True)
+        tStart = args.name_acquisition.split('_')[1]
+        waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_bckg".format(tStart),verbose=True)
         # send STS offsets to take a dark
         for iTel in telescopes:
             wopNsts = vlti.ssh("sts@wop{0}sts".format(iTel))
@@ -61,7 +62,6 @@ if __name__ == '__main__':
     waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
     waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming",verbose=True)
     waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ {0}".format(args.name_acquisition),verbose=True)
-    #waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str),verbose=True)
 
     # Prepare GPAO(s)
     for iTel in telescopes:

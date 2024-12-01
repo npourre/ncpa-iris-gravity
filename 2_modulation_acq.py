@@ -23,12 +23,13 @@ if __name__ == '__main__':
     parser.add_argument('mode', type=int, help="noll index of the modulation")
     parser.add_argument('repeat', type=int , help="number of repetition")
     parser.add_argument('floop', type=int , help="AO loop frequency")
+    parser.add_argument('name_acquisition', type=str, help="name of the GRAV acquisition")
     parser.add_argument('--duration', '-d', type=float, default=30.)
     parser.add_argument('--dit', '-i', type=float, default=0.01)
     parser.add_argument('--bck', '-b', type=int, default=1, help="Do we record a background or not. O/1")
     args = parser.parse_args()
 
-    tStart = datetime.utcnow().isoformat()[:-7]
+
     print(args.duration)
     ips = [4,1,2,1]
     ip_num = ips[args.tel-1]
@@ -54,10 +55,11 @@ if __name__ == '__main__':
 
     if args.bck:
         # Take background 
+        tStart = args.name_acquisition.split('_')[1]
         wgv.send("''", "gviControl", "SETUP", "\",,INS.SHUT11.ST F INS.SHUT12.ST F INS.SHUT13.ST F INS.SHUT14.ST F \"",verbose=True) # Close shutters
         #time.sleep(10)
         wgv.send("''", "ngcircon_NGCIR2", "SETUP", "\",,DET.NDIT {0}\"".format(1000))
-        wgv.send("''", "ngcircon_NGCIR2", "SETUP", "\",,DET.FRAM.FILENAME ncpa_bckg_{0}\"".format(tStart),verbose=True)
+        wgv.send("''", "ngcircon_NGCIR2", "SETUP", "\",,DET.FRAM.FILENAME GravNcpa_{0}_bckg\"".format(tStart),verbose=True)
         wgv.send("''", "ngcircon_NGCIR2", "START", "\"\"")
         time.sleep(1000*args.dit+5)
         #wgv.send("''", "gviControl", "SETUP", "\",,INS.SHUT1.ST T INS.SHUT2.ST T INS.SHUT13.ST T INS.SHUT14.ST T \"") # Open shutters
@@ -65,16 +67,16 @@ if __name__ == '__main__':
     wgv.send("''", "gviControl", "SETUP", "\",,INS.SHUT11.ST F INS.SHUT12.ST F INS.SHUT13.ST F INS.SHUT14.ST F \"",verbose=True) # Close shutters
     wgv.send("''", "gviControl", "SETUP", "\",,INS.SHUT1{0}.ST T \"".format(ip_num),verbose=True)
     # Start Field Guiding 
-    time.sleep(5)
+    time.sleep(2)
     wgv.send("''", "gvttpControl", "STRTLP", "FIELD_IMAGER",verbose=True)
-    time.sleep(10)
+    time.sleep(5)
     # Start recording on SC
     wgv.send("''", "ngcircon_NGCIR2", "SETUP", "\",,DET.NDIT {0}\"".format(nDit),verbose=True)
 
     nols = str(args.mode)
     if len(nols)==1:
         nols = '0'+nols
-    wgv.send("''", "ngcircon_NGCIR2", "SETUP", "\",,DET.FRAM.FILENAME ncpa_acq1m{0}_{1}\"".format(nols,tStart),verbose=True)
+    wgv.send("''", "ngcircon_NGCIR2", "SETUP", "\",,DET.FRAM.FILENAME {0}\"".format(args.name_acquisition),verbose=True)
     wgv.send("''", "ngcircon_NGCIR2", "START", "\"\"",verbose=True)
     time.sleep(1)
 
