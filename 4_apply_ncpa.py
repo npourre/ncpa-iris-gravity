@@ -44,7 +44,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     #get the last NCPA file
-    ncpa_file = sorted(glob.glob('data/outputs/NCPA_*.npy'))[-1]
+    ncpa_file = sorted(glob.glob('/user/temp_ncpa/NCPA_*.npy'))[-1]
     print('Applying {0} '.format(ncpa_file))
     ncpa_offset = -np.load(ncpa_file)
 

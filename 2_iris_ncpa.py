@@ -11,6 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('tel', type=int, choices=range(5), help="Telescope index; use 0 for all four at once.")
     parser.add_argument('mode', type=int , help="mode Noll index")
     parser.add_argument('floop', type=int , help="AO loop frequency")
+    parser.add_argument('name_acquisition', type=str, help="name of the IRIS acquisition")
     parser.add_argument('--duration', '-d', type=float, default=30.0)
     parser.add_argument('--bck', '-b', type=int, default=1, help="Do we record a background or not. O/1")
     args = parser.parse_args()
@@ -23,8 +24,6 @@ if __name__ == '__main__':
         ut_str = str(args.tel)
     else:
         print("WRONG TELESCOPE NUMBER")
-
-    tStart = datetime.utcnow().isoformat()[:-7]
 
     ccs.CcsInit(name='iris_ncpa.py')
     
@@ -42,7 +41,7 @@ if __name__ == '__main__':
         waral.send("''", "iracqServer", "SETUP", ",,DET.NDIT\ {0}".format(100))
         waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
         waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming",verbose=True)
-        waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_bckg".format(tStart),verbose=True)
+        waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_bckg".format(args.name_acquisition),verbose=True)
         # send STS offsets to take a dark
         for iTel in telescopes:
             wopNsts = vlti.ssh("sts@wop{0}sts".format(iTel))
@@ -61,7 +60,8 @@ if __name__ == '__main__':
     waral.send("''", "iracqServer", "SETUP", ",,DET.NDIT\ {0}".format(nDit))
     waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
     waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming",verbose=True)
-    waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str),verbose=True)
+    waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ {0}".format(args.name_acquisition),verbose=True)
+    #waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str),verbose=True)
 
     # Prepare GPAO(s)
     for iTel in telescopes:

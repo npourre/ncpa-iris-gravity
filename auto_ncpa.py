@@ -8,6 +8,7 @@ Created on Wed Oct  9 16:56:02 2024
 import os
 import argparse
 import time
+from datetime import datetime
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate the disturbance matrices")
@@ -45,8 +46,10 @@ if __name__ == '__main__':
     print("Launch IRIS/SC acquisition and GPAO disturbance")
     print("################")
     if args.inst == "IRIS":
-        duration_acq = (((args.timepermode+0.5) * args.repeat) + 2) / 1.5 + 20 # IRIS with DIT of 1 ms has a 1.5 ms frame rate
-        os.system('python 2_iris_ncpa.py {0} {1} {2} -d {3} -b {4}'.format(args.tel, args.mode, args.floop, duration_acq, args.background ))
+        tStart = datetime.utcnow().isoformat()[:-7]
+        name_acquisition = "IrisNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str)
+        duration_acq = (((args.timepermode+0.5) * args.repeat) + 1.5) + 10 
+        os.system('python 2_iris_ncpa.py {0} {1} {2} {3} -d {4} -b {5}'.format(args.tel, args.mode, args.floop, name_acquisition, duration_acq, args.background ))
     elif args.inst == "GRAV":
         duration_acq = ((args.timepermode+1) * args.repeat) + 30
         os.system('python 2_modulation_acq.py {0} {1} {2} {4} -d {3} -b {5} -i 0.01'.format(args.tel, args.mode, args.repeat, duration_acq, args.floop ,args.background))
@@ -59,7 +62,7 @@ if __name__ == '__main__':
     print("################")
     time.sleep(25)
     if args.inst == "IRIS":
-        os.system('python 3_process_ncpa.py {0} {1} {2} {3} {4} --t {5}'.format(args.tel, args.mode, args.repeat, args.floop, args.timepermode))
+        os.system('python 3_process_ncpa_iris.py {0} {1} {2} {3} {4} -t {5}'.format(args.tel, args.mode, args.repeat, args.floop, name_acquisition, args.timepermode))
     elif args.inst == "GRAV":
         os.system('python 3_process_ncpa_grav.py {0} {1} {2} {3}'.format(args.mode, args.amplitude_slow, args.repeat, args.floop))
     else:
