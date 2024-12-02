@@ -22,7 +22,7 @@ def exists_remote(host, path):
     raise Exception('SSH failed')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Generate the disturbance matrices")
+    parser = argparse.ArgumentParser(description="Measure one NCPA mode on IRIS or in GRAVITY SC")
     parser.add_argument('tel', type=int, choices=range(5), help="Telescope index. 0 for all telescopes")
     parser.add_argument('mode', type=int , help="mode Noll index")
     parser.add_argument('repeat', type=int , help="number of modulation sequence repetitions")
