@@ -28,9 +28,12 @@ if __name__ == '__main__':
     elif args.tel in [1,2,3,4]: #one UT measurement
         ut_str =str(args.tel)
 
+    time_start = time.time()
     for i_m, mode in enumerate(modes_list):
         if i_m==0:
-            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst}')
+            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -u 0')
         else: #save time by not recording another background and not fetching sparta matrices
-            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -b 0 -m 0')
-    print(f'Measurements and correction from Zernike Noll#{args.modes[0]} to #{args.modes[1]} from UT{ut_str} to {args.inst} finished')
+            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -b 0 -m 0 -u 0')
+    time_stop = time.time()
+    print(f'Measurements and correction from Zernike Noll#{args.modes[0]} to #{args.modes[1]} from UT{ut_str} to {args.inst} finished \n')
+    print('Lasted {0:.2f} minutes'.format( (time_stop-time_start)/60))

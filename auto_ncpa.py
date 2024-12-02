@@ -31,6 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--background','-b', type=int,default=1 , help="Do we record a background or not. 0/1")
     parser.add_argument('--timepermode','-t',type=float,default=1.5, help='time permode (sec)')
     parser.add_argument('--get_matrices','-m',type=int, default=1, help="Do we fetch SPARTA matrices. O/1")
+    parser.add_argument('--user_input','-u', type=int,default=1 , help="Ask for user validation to apply ncpa. 0/1")
     args = parser.parse_args()
     
     if args.tel==0:
