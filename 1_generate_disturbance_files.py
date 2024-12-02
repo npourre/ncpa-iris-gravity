@@ -63,7 +63,7 @@ if __name__ == '__main__':
 	parser.add_argument('mode', type=int , help="mode Noll index")
 	parser.add_argument('repeat', type=int , help="number of repetition for the measurement")
 	parser.add_argument('floop', type=int , help="AO loop frequency")
-	parser.add_argument('--timepermode','-t',type=int,default=4, help='time permode (sec)')
+	parser.add_argument('--timepermode','-t',type=float,default=1.5, help='time permode (sec)')
 	parser.add_argument('--amplitude_fast','-a',type=float,default=0.2, help='Amplitude of fast modulation [µm]')
 	parser.add_argument('--amplitude_slow','-s',type=float,default=0.2, help='Amplitude of slow modulation [µm]')
 	args = parser.parse_args()

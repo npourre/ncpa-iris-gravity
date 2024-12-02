@@ -28,7 +28,7 @@ import vlti
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
-def cutIrisDet(img, telescope, verbose=True): #Florentin's function
+def cutIrisDet(img, telescope, verbose=False): #Florentin's function
     telescope = int(telescope)
     if verbose:
         print("Input image shape",np.shape(img))
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     parser.add_argument('repeat', type=int, help="number of repetition for the modulation ")
     parser.add_argument('floop', type=int , help="AO loop frequency")
     parser.add_argument('name_acquisition', type=str, help="name of the acquisition")
-    parser.add_argument('--timepermode','-t',type=int,default=4, help='time permode (sec)')
+    parser.add_argument('--timepermode','-t',type=float,default=1.5, help='time permode (sec)')
     args = parser.parse_args()
     
     if args.tel==0: #all UTs measurements
@@ -128,12 +128,12 @@ if __name__ == '__main__':
     nRtcMod = args.timepermode * args.floop  # Number of RTC samples for one Zernike modulation
     nRtcPause = int(0.5* args.floop)  # Number of RTC samples for a pause between two modulations
     modAmp = 0.2 #µmrms
-    temp_folder = "/user/temp_ncpa/" # for tmporary storage of IRIS/GRAV data
+    temp_folder = "/vltuser/iss/temp_ncpa/" # for tmporary storage of IRIS/GRAV data
 
     # Transfer Iris acquisition to ISS
-    os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(args.name_acquisition, temp_folder))
+    os.system("""FILE=$(ssh aral@waral "ls -tp /data/ARAL/INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(args.name_acquisition, temp_folder))
     # Transfer lastest Iris background to ISS
-    os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/IrisNcpa_*bckg*_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {0} """.format(temp_folder))
+    os.system("""FILE=$(ssh aral@waral "ls -tp /data/ARAL/INS_ROOT/SYSTEM/DETDATA/IrisNcpa_*bckg*_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {0} """.format(temp_folder))
 
     filename = temp_folder + args.name_acquisition + '_DIT.fits'
     bckgname = sorted(glob.glob(temp_folder+'IrisNcpa_*bckg*.fits'))[-1]

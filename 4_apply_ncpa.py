@@ -50,7 +50,7 @@ if __name__ == '__main__':
     
     tStart = args.name_acquisition.split('_')[1]
     #get the last NCPA file
-    ncpa_file = sorted(glob.glob('/user/temp_ncpa/NCPA_*{0}*.npy'.format(tStart)))[-1]
+    ncpa_file = sorted(glob.glob('/vltuser/iss/temp_ncpa/NCPA_*{0}*.npy'.format(tStart)))[-1]
     print('Applying {0} '.format(ncpa_file))
     ncpa_offset = -np.load(ncpa_file)
 

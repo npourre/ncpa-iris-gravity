@@ -111,19 +111,19 @@ if __name__ == '__main__':
     parser.add_argument('repeat', type=int, help="number of repetition for the modulation ")
     parser.add_argument('floop', type=int , help="AO loop frequency")
     parser.add_argument('name_acquisition', type=str, help="name of the acquisition")
-    parser.add_argument('--timepermode','-t',type=int,default=4, help='time permode (sec)')
+    parser.add_argument('--timepermode','-t',type=float,default=1.5, help='time permode (sec)')
     args = parser.parse_args()
     
     nZ = args.repeat  # Number of repetitions
     nRtcMod = args.timepermode * args.floop  # Number of RTC samples for one Zernike modulation
     nRtcPause = int(0.5* args.floop)  # Number of RTC samples for a pause between two modulations
     modAmp = 0.2 #µmrms
-    temp_folder = "/user/temp_ncpa/" # for tmporary storage of IRIS/GRAV data
+    temp_folder = "/vltuser/iss/temp_ncpa/" # for tmporary storage of IRIS/GRAV data
     
     # Transfer GRAV SC acquisition to ISS
-    os.system("""FILE=$(ssh grav@wgv "ls -tp $INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits | grep -m1 \"\""); scp grav@wgv:$FILE {1} """.format(args.name_acquisition, temp_folder))
+    os.system("""FILE=$(ssh grav@wgv "ls -tp /data/GRAVITY/INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits | grep -m1 \"\""); scp grav@wgv:$FILE {1} """.format(args.name_acquisition, temp_folder))
     # Transfer lastest GRAV SC background to ISS
-    os.system("""FILE=$(ssh grav@wgv "ls -tp $INS_ROOT/SYSTEM/DETDATA/GravNcpa_*bckg*_DIT.fits | grep -m1 \"\""); scp grav@wgv:$FILE {0} """.format(temp_folder))
+    os.system("""FILE=$(ssh grav@wgv "ls -tp /data/GRAVITY/INS_ROOT/SYSTEM/DETDATA/GravNcpa_*bckg*_DIT.fits | grep -m1 \"\""); scp grav@wgv:$FILE {0} """.format(temp_folder))
 
     filename = temp_folder + args.name_acquisition + '_DIT.fits'
     bckgname = sorted(glob.glob(temp_folder+'GravNcpa_*bckg*.fits'))

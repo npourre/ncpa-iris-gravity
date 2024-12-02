@@ -79,7 +79,7 @@ if __name__ == '__main__':
     if args.inst == "IRIS":
         #Wait for file on the remote server
         start_time = time.time()
-        while not exists_remote('aral@waral', '$INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits'.format(name_acquisition)):
+        while not exists_remote('aral@waral', '/data/ARAL/INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits'.format(name_acquisition)):
             time.sleep(1)
             if (time.time()-start_time) > timeout_time:
                 raise RuntimeError('Maximal waiting time reached')
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     elif args.inst == "GRAV":
         #Wait for file on the remote server
         start_time = time.time()
-        while not exists_remote('grav@wgv', "$INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits".format(name_acquisition)):
+        while not exists_remote('grav@wgv', "/data/GRAVITY/INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits".format(name_acquisition)):
             time.sleep(1)
             if (time.time()-start_time) > timeout_time:
                 raise RuntimeError('Maximal waiting time reached')
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         os.system('python iris_acq.py -d 3 -n IrisAcq_beforecorr_{0}'.format(tStart))
     #Check existence of NCPA file
     start_time = time.time()
-    while not os.path.exists('/user/temp_ncpa/NCPA_{0}.npy'.format(name_acquisition)):
+    while not os.path.exists('/vltuser/iss/temp_ncpa/NCPA_{0}.npy'.format(name_acquisition)):
         time.sleep(1)
         if (time.time()-start_time) > timeout_time:
             raise RuntimeError('Maximal waiting time reached')
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     time.sleep(1)
     if args.psf_display==1:
         os.system('python iris_acq.py -d 3 -n IrisAcq_aftercorr_{0}'.format(tStart))
-        while not exists_remote('aral@waral', '$INS_ROOT/SYSTEM/DETDATA/IrisAcq_aftercorr_{0}_DIT.fits'.format(tStart)):
+        while not exists_remote('aral@waral', '/data/ARAL/INS_ROOT/SYSTEM/DETDATA/IrisAcq_aftercorr_{0}_DIT.fits'.format(tStart)):
             time.sleep(1)
             if (time.time()-start_time) > timeout_time:
                 raise RuntimeError('Maximal waiting time reached')

@@ -30,17 +30,17 @@ if __name__ == '__main__':
 	parser.add_argument('--silent','-s', type=int,default=0 , help="Silent=no pop-up, 0 = Not silent, 1=Silent. 0/1")
 	args = parser.parse_args()
 	
-	temp_folder = "/user/temp_ncpa/" # for temporary storage of IRIS data on ISS
+	temp_folder = "/vltuser/iss/temp_ncpa/" # for temporary storage of IRIS data on ISS
 
 
 	# Transfer Iris acquisitions to ISS
-	os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/IrisAcq_beforecorr_{0}_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(tstart, temp_folder))
-	os.system("""FILE=$(ssh aral@waral "ls -tp $INS_ROOT/SYSTEM/DETDATA/IrisAcq_aftercorr_{0}_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(tstart, temp_folder))
+	os.system("""FILE=$(ssh aral@waral "ls -tp /data/ARAL/INS_ROOT/SYSTEM/DETDATA/IrisAcq_beforecorr_{0}_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(tstart, temp_folder))
+	os.system("""FILE=$(ssh aral@waral "ls -tp /data/ARAL/INS_ROOT/SYSTEM/DETDATA/IrisAcq_aftercorr_{0}_DIT.fits | grep -m1 \"\""); scp aral@waral:$FILE {1} """.format(tstart, temp_folder))
 	
 	#Check existence of fits files on ISS
 	timeout_time = 120
 	start_time = time.time()
-	while not (os.path.exists('/user/temp_ncpa/IrisAcq_beforecorr_{0}_DIT.fits'.format(tstart)) and os.path.exists('/user/temp_ncpa/IrisAcq_aftercorr_{0}_DIT.fits'.format(tstart)) ):
+	while not (os.path.exists('{0}IrisAcq_beforecorr_{1}_DIT.fits'.format(temp_folder, tstart)) and os.path.exists('{0}IrisAcq_aftercorr_{1}_DIT.fits'.format(temp_folder, tstart)) ):
 		time.sleep(1)
 		if (time.time()-start_time) > timeout_time:
 			raise RuntimeError('Maximal waiting time reached')
