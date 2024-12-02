@@ -27,6 +27,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="Record IRIS data cube")
 	parser.add_argument('tel', type=int, choices=range(5), help="Telescope index. 0 for all telescopes")
 	parser.add_argument('tstart', type=str, help="time of the measurement") 
+	parser.add_argument('--silent','-s', type=int,default=0 , help="Silent=no pop-up, 0 = Not silent, 1=Silent. 0/1")
 	args = parser.parse_args()
 	
 	temp_folder = "/user/temp_ncpa/" # for temporary storage of IRIS data on ISS
@@ -74,7 +75,10 @@ if __name__ == '__main__':
 			axarr[indTel][1].set_title('UT{0} after last NCPA correction'.format(indTel+1))
 			fig.colorbar(im, ax=axarr[indTel][1],fraction=0.046, pad=0.04,label="[ADU]")
 		plt.tight_layout()
-		plt.show()
+		if args.silent=='1':
+			plt.savefig('IrisAcq_PSFs_{0}.png')
+		else:
+			plt.show()
 	elif args.tel in [1,2,3,4]: #one UT measurement
 		iris_before_mean = cutIrisDet(iris_before,args.tel).mean(0)
 		iris_after_mean = cutIrisDet(iris_after,args.tel).mean(0)
@@ -90,6 +94,9 @@ if __name__ == '__main__':
 		axarr.ravel()[1].set_title('UT{0} after last NCPA correction'.format(args.tel))
 		fig.colorbar(im, ax=axarr.ravel()[1],fraction=0.046, pad=0.04,label="[ADU]")
 		plt.tight_layout()
-		plt.show()
+		if args.silent=='1':
+			plt.savefig('IrisAcq_PSFs_{0}.png')
+		else:
+			plt.show()
 	else:
 	   print("WRONG TELESCOPE NUMBER")

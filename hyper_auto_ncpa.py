@@ -31,9 +31,9 @@ if __name__ == '__main__':
     time_start = time.time()
     for i_m, mode in enumerate(modes_list):
         if i_m==0:
-            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -u 0')
+            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -u 0 -s 1')
         else: #save time by not recording another background and not fetching sparta matrices
-            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -b 0 -m 0 -u 0')
+            os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -b 0 -m 0 -u 0 -s 1')
     time_stop = time.time()
     print(f'Measurements and correction from Zernike Noll#{args.modes[0]} to #{args.modes[1]} from UT{ut_str} to {args.inst} finished \n')
     print('Lasted {0:.2f} minutes'.format( (time_stop-time_start)/60))

@@ -33,6 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('--get_matrices','-m',type=int, default=1, help="Do we fetch SPARTA matrices. 0/1")
     parser.add_argument('--user_input','-u', type=int,default=1 , help="Ask for user validation to apply ncpa. 0/1")
     parser.add_argument('--psf_display','-p', type=int,default=0 , help="Show IRIS PSF before and after correction. 0/1")
+    parser.add_argument('--silent_psf_display','-s', type=int,default=0 , help="Prevent popup PSF IRIS. 0/1")
     args = parser.parse_args()
     
     if args.tel==0:
@@ -117,4 +118,4 @@ if __name__ == '__main__':
             time.sleep(1)
             if (time.time()-start_time) > timeout_time:
                 raise RuntimeError('Maximal waiting time reached')
-        os.system('python display_psf.py {0} {1}'.format(args.tel, tStart))
+        os.system('python display_psf.py {0} {1} -s {2}'.format(args.tel, tStart, args.silent_psf_display))
