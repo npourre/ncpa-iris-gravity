@@ -30,8 +30,9 @@ if __name__ == '__main__':
     parser.add_argument('inst', type=str , help="IRIS or GRAV")
     parser.add_argument('--background','-b', type=int,default=1 , help="Do we record a background or not. 0/1")
     parser.add_argument('--timepermode','-t',type=float,default=1.5, help='time permode (sec)')
-    parser.add_argument('--get_matrices','-m',type=int, default=1, help="Do we fetch SPARTA matrices. O/1")
+    parser.add_argument('--get_matrices','-m',type=int, default=1, help="Do we fetch SPARTA matrices. 0/1")
     parser.add_argument('--user_input','-u', type=int,default=1 , help="Ask for user validation to apply ncpa. 0/1")
+    parser.add_argument('--psf_display','-p', type=int,default=0 , help="Show IRIS PSF before and after correction. 0/1")
     args = parser.parse_args()
     
     if args.tel==0:
@@ -99,5 +100,21 @@ if __name__ == '__main__':
     print("################")
     print("Apply NCPA")
     print("################")
-    time.sleep(1)
+    if args.psf_display==1:
+        os.system('python iris_acq.py -d 3 -n IrisAcq_beforecorr_{0}'.format(tStart))
+    #Check existence of NCPA file
+    start_time = time.time()
+    while not os.path.exists('/user/temp_ncpa/NCPA_{0}.npy'.format(name_acquisition)):
+        time.sleep(1)
+        if (time.time()-start_time) > timeout_time:
+            raise RuntimeError('Maximal waiting time reached')
+
     os.system('python 4_apply_ncpa.py {0} {1} {2}'.format(args.tel, args.mode, name_acquisition))
+    time.sleep(1)
+    if args.psf_display==1:
+        os.system('python iris_acq.py -d 3 -n IrisAcq_aftercorr_{0}'.format(tStart))
+        while not exists_remote('aral@waral', '$INS_ROOT/SYSTEM/DETDATA/IrisAcq_aftercorr_{0}_DIT.fits'.format(tStart)):
+            time.sleep(1)
+            if (time.time()-start_time) > timeout_time:
+                raise RuntimeError('Maximal waiting time reached')
+        os.system('python display_psf.py {0} {1}'.format(args.tel, tStart))

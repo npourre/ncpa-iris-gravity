@@ -5,9 +5,9 @@ import ccs
 import vlti
 
 if __name__ == '__main__':
-	#Check that the NAOMI loop is closed!
-	parser = argparse.ArgumentParser(description="Start with a background and record IRIS data cube")
+	parser = argparse.ArgumentParser(description="Record IRIS data cube")
 	parser.add_argument('--duration', '-d', type=float, default=30.0) #second
+	parser.add_argument('--name', '-n', type=str, default="") 
 	args = parser.parse_args()
 
 	tStart = datetime.utcnow().isoformat()[:-7]
@@ -27,7 +27,10 @@ if __name__ == '__main__':
 	waral.send("''", "iracqServer", "SETUP", ",,DET.DITDELAY\ 0")
 	waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
 	waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming")
-	waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisAcq_{0}".format(tStart),verbose=True)
+	if not args.name=="":
+		waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ {0}".format(args.name),verbose=True)
+	else:
+		waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisAcq_{0}".format(tStart),verbose=True)
 
 	print("The image integration will last {0} s".format(dit*nDit))
 	# Start recording on IRIS
