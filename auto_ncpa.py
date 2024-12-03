@@ -10,6 +10,8 @@ import argparse
 import time
 from datetime import datetime
 import subprocess
+import shlex
+from astropy.io import fits
 
 def exists_remote(host, path):
     """Test if a file exists at path on a host accessible with SSH."""
@@ -20,6 +22,22 @@ def exists_remote(host, path):
     if status == 1:
         return False
     raise Exception('SSH failed')
+
+def download_latest_file(server, remote_dir, name, local_dir):
+    # Construct the command to find the latest file with the given prefix
+    find_command = (
+        f"""FILE=$(ssh {server} "ls -tp {remote_dir}/{name} 2>/dev/null | head -n 1"); """
+        f"""if [ -n "$FILE" ]; then scp {server}:$FILE {local_dir}; """
+        f"""else echo 'No files found with the name {name}'; fi"""
+    )
+    
+    # Execute the command
+    result = os.system(find_command)
+    
+    if result == 0:
+        print("File downloaded successfully.")
+    else:
+        print("An error occurred during the download.")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Measure one NCPA mode on IRIS or in GRAVITY SC")
@@ -33,7 +51,7 @@ if __name__ == '__main__':
     parser.add_argument('--get_matrices','-m',type=int, default=1, help="Do we fetch SPARTA matrices. 0/1")
     parser.add_argument('--user_input','-u', type=int,default=1 , help="Ask for user validation to apply ncpa. 0/1")
     parser.add_argument('--psf_display','-p', type=int,default=0 , help="Show IRIS PSF before and after correction. 0/1")
-    parser.add_argument('--silent_psf_display','-s', type=int,default=0 , help="Prevent popup PSF IRIS. 0/1")
+    parser.add_argument('--silent','-s', type=int,default=0 , help="Prevent popup. 0/1")
     args = parser.parse_args()
     
     if args.tel==0:
@@ -62,7 +80,7 @@ if __name__ == '__main__':
     tStart = datetime.utcnow().isoformat()[:-7]
     if args.inst == "IRIS":
         name_acquisition = "IrisNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str)
-        duration_acq = (((args.timepermode+0.5) * args.repeat) + 1.5) + 10 
+        duration_acq = (((args.timepermode+0.5) * args.repeat) + 1.5) + 18 
         os.system('python 2_iris_ncpa.py {0} {1} {2} {3} -d {4} -b {5}'.format(args.tel, args.mode, args.floop, name_acquisition, duration_acq, args.background ))
     elif args.inst == "GRAV":
         name_acquisition = "GravNcpa_{0}_noll{1}_UT{2}".format(tStart, args.mode, ut_str)
@@ -71,20 +89,29 @@ if __name__ == '__main__':
     else:
         print("WRONG INSTRUMENT NAME")
         raise ValueError('INST not known')
-    
-    print("################")
-    print("Process IRIS/SC images to extract NCPA")
-    print("################")
     timeout_time = 300 #s
     if args.inst == "IRIS":
         #Wait for file on the remote server
+        time.sleep(duration_acq)
         start_time = time.time()
+        terminated = False
         while not exists_remote('aral@waral', '/data/ARAL/INS_ROOT/SYSTEM/DETDATA/{0}_DIT.fits'.format(name_acquisition)):
             time.sleep(1)
             if (time.time()-start_time) > timeout_time:
                 raise RuntimeError('Maximal waiting time reached')
         print("File found!")
-        os.system('python 3_process_ncpa_iris.py {0} {1} {2} {3} {4} -t {5}'.format(args.tel, args.mode, args.repeat, args.floop, name_acquisition, args.timepermode))
+        while not terminated:
+            download_latest_file('aral@waral','/data/ARAL/INS_ROOT/SYSTEM/DETDATA/' , '{0}_DIT.fits'.format(name_acquisition), '/vltuser/iss/temp_ncpa/')
+            try:
+                fits.getdata('/vltuser/iss/temp_ncpa/{0}_DIT.fits'.format(name_acquisition),0)
+            except:
+                time.sleep(2)
+            else:
+                terminated = True
+        print("################")
+        print("Process IRIS/SC images to extract NCPA")
+        print("################")          
+        os.system('python 3_process_ncpa_iris.py {0} {1} {2} {3} {4} -t {5} -s {6}'.format(args.tel, args.mode, args.repeat, args.floop, name_acquisition, args.timepermode, args.silent))
     elif args.inst == "GRAV":
         #Wait for file on the remote server
         start_time = time.time()
@@ -110,7 +137,7 @@ if __name__ == '__main__':
         if (time.time()-start_time) > timeout_time:
             raise RuntimeError('Maximal waiting time reached')
 
-    os.system('python 4_apply_ncpa.py {0} {1} {2}'.format(args.tel, args.mode, name_acquisition))
+    os.system('python 4_apply_ncpa.py {0} {1} {2} -u {3}'.format(args.tel, args.mode, name_acquisition, args.user_input))
     time.sleep(1)
     if args.psf_display==1:
         os.system('python iris_acq.py -d 3 -n IrisAcq_aftercorr_{0}'.format(tStart))
@@ -118,4 +145,4 @@ if __name__ == '__main__':
             time.sleep(1)
             if (time.time()-start_time) > timeout_time:
                 raise RuntimeError('Maximal waiting time reached')
-        os.system('python display_psf.py {0} {1} -s {2}'.format(args.tel, tStart, args.silent_psf_display))
+        os.system('python display_psf.py {0} {1} -s {2}'.format(args.tel, tStart, args.silent))

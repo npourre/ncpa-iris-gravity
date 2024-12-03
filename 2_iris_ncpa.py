@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     # Start recording on IRIS
     waral.send("''", "iracqServer", "START", "''",verbose=True)
-    time.sleep(1)
+    #time.sleep(1)
 
     # Start modulation on GPAO(s)
     for iTel in telescopes:
