@@ -31,9 +31,9 @@ if __name__ == '__main__':
 
     time_start = time.time()
     for i_m, mode in enumerate(modes_list):
-        if i_m==0:
+        if i_m==0: #record a PSF for the first mode, and load matrices
             os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -u 0 -p 1 -s 1')
-        elif i_m==(len(modes_list)-1):
+        elif i_m==(len(modes_list)-1): #record a PSF for the last mode
             os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -u 0 -m 0 -p 1 -s 1')
         else: #save time by not recording another background and not fetching sparta matrices
             os.system(f'python auto_ncpa.py {args.tel} {mode} {args.repeat} {args.floop} {args.inst} -b 0 -m 0 -u 0 -p 0 -s 1')

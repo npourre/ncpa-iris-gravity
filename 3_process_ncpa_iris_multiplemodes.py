@@ -123,8 +123,8 @@ def extract_ncpa_iris(cube_1ut, nZ, nRtcMod, nRtcPause, modAmp):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process NCPA files")
     parser.add_argument('tel', type=int, choices=range(5), help="Telescope index; use 0 for all four at once.")
-    parser.add_argument('noll', type=int, help="noll index of the modulation ")
-    parser.add_argument('repeat', type=int, help="number of repetition for the modulation ")
+    parser.add_argument('mode_start', type=int , help="start mode Noll index")
+    parser.add_argument('mode_end', type=int , help="end mode Noll index")
     parser.add_argument('floop', type=int , help="AO loop frequency")
     parser.add_argument('name_acquisition', type=str, help="name of the acquisition")
     parser.add_argument('--timepermode','-t',type=float,default=1.5, help='time permode (sec)')
@@ -139,9 +139,10 @@ if __name__ == '__main__':
         ut_str = str(args.tel)
     else:
         print("WRONG TELESCOPE NUMBER")
+    iZs = np.arange(args.mode_start, args.mode_end+1)
 
     #Parameters (same as modulation)
-    nZ = args.repeat  # Number of repetitions
+    nZ = len(iZs)  # Number of repetitions
     nRtcMod = args.timepermode * args.floop  # Number of RTC samples for one Zernike modulation
     nRtcPause = int(0.5* args.floop)  # Number of RTC samples for a pause between two modulations
     modAmp = 0.2 #µmrms
@@ -201,30 +202,26 @@ if __name__ == '__main__':
         if args.tel==0 and ncpa_tot.shape[0]==4: #4 UTs at once
             fig, axarr = plt.subplots(2, 2, figsize=(12,8))
             for indTel in range(4):
-                axarr.ravel()[indTel].plot(ncpa_tot[indTel]*1e3, '.-', label='({0:.0f} nmRMS)'.format(np.mean(ncpa_tot[indTel])*1e3))
-                axarr.ravel()[indTel].set_xlabel('Repetition of Noll {0}'.format(args.noll))
+                axarr.ravel()[indTel].plot(iZs, ncpa_tot[indTel]*1e3, '.-')
+                axarr.ravel()[indTel].set_xlabel('Noll number')
                 axarr.ravel()[indTel].set_ylabel('NCPA [nmRMS]')
                 axarr.ravel()[indTel].set_title('UT{0}'.format(indTel+1))
-                axarr.ravel()[indTel].set_xlim(0, len(ncpa_tot[indTel]))
                 axarr.ravel()[indTel].set_ylim(-np.abs(np.min(ncpa_tot[indTel]*1e3))*1.1,np.abs(np.max(ncpa_tot[indTel]*1e3))*1.1)
                 axarr.ravel()[indTel].grid()
                 axarr.ravel()[indTel].legend()
-                print("Average NCPA noll {0}  on UT {1} amplitude ({2:.0f} nmRMS)".format(args.noll, indTel+1, np.mean(ncpa_tot[indTel])*1e3))
             plt.suptitle(filename)
             plt.tight_layout()
             plt.show()
         elif (args.tel in [1,2,3,4]) and ncpa_tot.shape[0]==1: #one UT measurement
             fig, axarr = plt.subplots(1, 1, figsize=(8,6))
-            axarr.plot(ncpa_tot[0]*1e3, '.-', label='({0:.0f} nmRMS)'.format(np.mean(ncpa_tot[0])*1e3))
-            axarr.set_xlabel('Repetition of Noll {0}'.format(args.noll))
+            axarr.plot(iZs, ncpa_tot[0]*1e3, '.-')
+            axarr.set_xlabel('Noll number')
             axarr.set_ylabel('NCPA [nmRMS]')
             axarr.set_title(filename)
             axarr.text(0,0,'UT{0}'.format(args.tel),fontsize=20)
-            axarr.set_xlim(0, len(ncpa_tot[0]))
             axarr.set_ylim(-np.abs(np.min(ncpa_tot[0]*1e3))*1.1,np.abs(np.max(ncpa_tot[0]*1e3))*1.1)
             axarr.grid()
             axarr.legend()
-            print("Average NCPA noll {0}  on UT {1} amplitude ({2:.0f} nmRMS)".format(args.noll, args.tel, np.mean(ncpa_tot[0])*1e3))
             plt.tight_layout()
             plt.show()
         else:
@@ -234,11 +231,11 @@ if __name__ == '__main__':
         if args.tel==0: #4 UTs at once
             fig, axarr = plt.subplots(2, 2, figsize=(12,8))
             for indTel in range(4):
-                for iZ in range(args.repeat):
+                for iZ in range(len(iZs)):
                     xStart = iStartArr[indTel]+iZ*(nMeasureArr[indTel]+nPauseArr[indTel]) + nPauseArr[indTel]*2
                     xStop = iStartArr[indTel]+iZ*(nMeasureArr[indTel]+nPauseArr[indTel]) + nPauseArr[indTel]*2 + nMeasureArr[indTel]
                     axarr.ravel()[indTel].add_patch(patches.Rectangle((xStart,0), xStop-xStart,  np.max(mix_f_Arr[indTel])/2, alpha=0.2, color='grey'))
-                    axarr.ravel()[indTel].text((xStart+xStop)/2.0,  np.max(mix_f_Arr[indTel])/2, 'Z{0}'.format(args.noll), va='top', ha='center')
+                    axarr.ravel()[indTel].text((xStart+xStop)/2.0,  np.max(mix_f_Arr[indTel])/2, 'Z{0}'.format(iZs[iZ]), va='top', ha='center')
                 axarr.ravel()[indTel].plot(mix_f_Arr[indTel])
                 axarr.ravel()[indTel].plot([0, nSample[indTel]], [threshold[indTel], threshold[indTel]], 'k', lw=0.5)
                 axarr.ravel()[indTel].set_ylabel('1F amplitude')
@@ -252,17 +249,16 @@ if __name__ == '__main__':
             plt.show()
         elif args.tel in [1,2,3,4]: #one UT measurement
             fig, axarr = plt.subplots(1, 1, figsize=(8,6))
-            for iZ in range(args.repeat):
+            for iZ in range(len(iZs)):
                 xStart = iStartArr[0]+iZ*(nMeasureArr[0]+nPauseArr[0]) + nPauseArr[0]*2
                 xStop = iStartArr[0]+iZ*(nMeasureArr[0]+nPauseArr[0]) + nMeasureArr[0] + nPauseArr[0]*2
                 axarr.add_patch(patches.Rectangle((xStart,0), xStop-xStart, np.max(mix_f_Arr[0])/2, alpha=0.2, color='grey'))
-                axarr.text((xStart+xStop)/2.0, np.max(mix_f_Arr[0])/2, 'Z{0}'.format(args.noll), va='top', ha='center')
+                axarr.text((xStart+xStop)/2.0, np.max(mix_f_Arr[0])/2, 'Z{0}'.format(iZs[iZ]), va='top', ha='center')
             axarr.plot(mix_f_Arr[0])
             axarr.plot([0, nSample[0]], [threshold[0], threshold[0]], 'k', lw=0.5)
             axarr.set_ylabel('1F amplitude')
             axarr.set_title('UT{0}'.format(args.tel))
             axarr.legend()
-            #axarr.set_xlim(0, np.max(iStartArr[0])+nMeasureArr[0]*14+nPauseArr[0]*11)
             axarr.set_ylim(bottom=0)
             axarr.set_xlabel('Samples')
             plt.tight_layout()
