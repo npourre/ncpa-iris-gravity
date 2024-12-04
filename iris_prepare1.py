@@ -3,6 +3,12 @@ from datetime import datetime
 import time
 import ccs
 import vlti
+import isstoo
+from astropy.io import fits
+import numpy as np
+from scipy import linalg as la
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="prepare iris for NCPA")
@@ -50,4 +56,10 @@ if __name__ == '__main__':
         
     # OPTIMIZE GPAO with new power
     # GET GPAO LOOP frequency
+    ins = isstoo.Ins()
+    floops = np.zeros(4)
+    for iTel in telescopes:
+        HOacq = ins.gpao.sparta[iTel-1].get_component('HOAcq')
+        loop_concentr = ins.gpao.sparta[iTel-1].get_component('HOLoopConcentr')
+        floops[iTel-1] = ins.gpao.sparta[iTel-1].read_property(loop_concentr, 'frame_rate')
     # CLOSE GPAO LOOP
