@@ -37,7 +37,7 @@ def generate_disturb(iTel, period,amplitude_fast, amplitude_slow, f, f_fast, mar
 		unscramble = (hdulist[0].data).flatten().astype(int)
 	scr_M2S = rot_uns_M2S[unscramble]
 
-	iZs = np.arange(mode_noll_start,mode_noll_stop+1)
+	iZs = np.arange(mode_noll_start,mode_noll_end+1)
 	n_mod = iZs.shape[0]
 	# Create fundamental modulation
 	modulation = amplitude_slow*np.sin(2.0*np.pi*np.arange(period)/(period/2)) + amplitude_fast*np.sin(2.0*np.pi*np.arange(period)/f*f_fast)

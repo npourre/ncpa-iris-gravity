@@ -15,6 +15,8 @@ import time
 import os
 import ccs
 import vlti
+from PySide2 import QtWidgets
+import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 import glob
@@ -51,16 +53,30 @@ if __name__ == '__main__':
     
     tStart = args.name_acquisition.split('_')[1]
     #get the last NCPA file
-    ncpa_file = sorted(glob.glob('/vltuser/iss/temp_ncpa/NCPA_*{0}*.npy'.format(tStart)))[-1]
-    print('Applying {0} '.format(ncpa_file))
-    ncpa_offset = -np.load(ncpa_file)
+    names_acqs = np.load('names_acqs.npy')
+    ncpas = []
+    if names_acqs[0] == args.name_acquisition:
+        for nam in names_acqs:
+            tStart = nam.split('_')[1]
+            ncpa_file = sorted(glob.glob('/vltuser/iss/temp_ncpa/NCPA_*{0}*.npy'.format(tStart)))[-1]
+            print('Applying {0} '.format(ncpa_file))
+            ncpa_offset = -np.load(ncpa_file)
+            ncpas.append(np.copy(ncpa_offset))
+    else:
+        raise OSError
+    ncpas = np.array(ncpas).mean(0)
+    plt.figure()
+    plt.plot(ncpas[0]*1e3,'.-')
+    plt.grid()
+    plt.ylim(-np.max(np.abs(ncpas*1e3))*1.1,np.max(np.abs(ncpas*1e3)*1.1))
+    plt.show()
 
     # Prepare GPAO(s)
     if args.tel==0: #all UTs measurements
         for indTel in range(4):
-            apply_offset(ncpa_offset,indTel,args.mode_start,args.mode_end, args.user_input)
+            apply_offset(ncpas,indTel,args.mode_start,args.mode_end, args.user_input)
     elif args.tel in [1,2,3,4]: #one UT measurement
-        apply_offset(ncpa_offset,args.tel-1,args.mode_start,args.mode_end, args.user_input)
+        apply_offset(ncpas,args.tel-1,args.mode_start,args.mode_end, args.user_input)
     else:
         print("WRONG TELESCOPE NUMBER")
 

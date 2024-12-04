@@ -153,7 +153,7 @@ if __name__ == '__main__':
 
     server = "aral@waral"
     remote_dir = "/data/ARAL/INS_ROOT/SYSTEM/DETDATA" 
-    download_latest_file(server, remote_dir, filename, temp_folder)
+    #download_latest_file(server, remote_dir, filename, temp_folder)
     # Transfer lastest Iris background to ISS
     download_latest_file(server, remote_dir, "IrisNcpa_*bckg*_DIT.fits", temp_folder)
     filename = temp_folder+filename
