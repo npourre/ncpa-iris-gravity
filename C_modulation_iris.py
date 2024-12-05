@@ -1,29 +1,15 @@
-import argparse
-from datetime import datetime
+
 import time
 import ccs
 import vlti
 
-## LAUNCH FROM ISS
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Record IRIS data cube for NCPA")
-    parser.add_argument('tel', type=int, choices=range(5), help="Telescope index; use 0 for all four at once.")
-    parser.add_argument('mode_start', type=int , help="start mode Noll index")
-    parser.add_argument('mode_end', type=int , help="end mode Noll index")
-    parser.add_argument('repeat', type=int , help="number of repetitions")
-    parser.add_argument('floop', type=int , help="AO loop frequency")
-    parser.add_argument('name_acquisition', type=str, help="name of the IRIS acquisition")
-    parser.add_argument('--duration', '-d', type=float, default=30.0)
-    parser.add_argument('--bck', '-b', type=int, default=1, help="Do we record a background or not. O/1")
-    args = parser.parse_args()
-
-    if args.tel==0: #all UTs measurements
+def C_modulation_iris(tel, mode_start, mode_end, repeat, sequence, floop, name_acquisition, duration, bck)
+    if tel==0: #all UTs measurements
         telescopes = [1,2,3,4]
         ut_str = "1234"
     elif args.tel in [1,2,3,4]: #one UT measurement
-        telescopes = [args.tel]
-        ut_str = str(args.tel)
+        telescopes = [tel]
+        ut_str = str(tel)
     else:
         print("WRONG TELESCOPE NUMBER")
 
@@ -40,8 +26,9 @@ if __name__ == '__main__':
     nDit = int(args.duration/framedit)
 
     iss_ssh = vlti.ssh("iss@wvgvlti")
-    iss_ssh.send("''", 'issifControl', 'STOPLAG', "''")
-    if args.bck:
+
+    if bck:
+        iss_ssh.send("''", 'issifControl', 'STOPLAG', "''")
         waral.send("''", "iracqServer", "SETUP", ",,DET.NDIT\ {0}".format(100))
         waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
         waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming")
@@ -62,7 +49,6 @@ if __name__ == '__main__':
     # Start Lab Guiding
     iss_ssh.send("''", 'issifControl', 'STRTLAG', 'AS_SUCH')
 
-
     # Prepare IRIS
     waral.send("''", "iracqServer", "SETUP", ",,DET.NDIT\ {0}".format(nDit))
     waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
@@ -70,11 +56,18 @@ if __name__ == '__main__':
     waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ {0}".format(args.name_acquisition))
 
     # Prepare GPAO(s)
-    for iTel in telescopes:
-        wgpNao = vlti.ssh("gpao{0}@wgp{0}ao".format(iTel))
-        wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "\"HOAcqDisturb.FILENAME $INS_ROOT/SYSTEM/SPARTA/RTCDATA/NcpaModulation_noll{0}to{1}_tel{2}_f{3}.fits\"".format(args.mode_start,args.mode_end,iTel,args.floop))
-        wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", f"HOAcqDisturb.CYCLES\ {args.repeat}")
-        wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "HOAcqDisturb.START_AT_FC\ 0")
+    if sequence == 'PAR':
+        for iTel in telescopes:
+            wgpNao = vlti.ssh("gpao{0}@wgp{0}ao".format(iTel))
+            wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "\"HOAcqDisturb.FILENAME $INS_ROOT/SYSTEM/SPARTA/RTCDATA/NcpaModulation_noll{0}to{1}_tel{2}_f{3}.fits\"".format(mode_start, mode_end, iTel, floop))
+            wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", f"HOAcqDisturb.CYCLES\ {repeat}")
+            wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "HOAcqDisturb.START_AT_FC\ 0")
+    elif sequence == 'SEQ':
+        for iTel in telescopes:
+            wgpNao = vlti.ssh("gpao{0}@wgp{0}ao".format(iTel))
+            wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "\"HOAcqDisturb.FILENAME $INS_ROOT/SYSTEM/SPARTA/RTCDATA/NcpaModulation_noll{0}_tel{1}_f{2}.fits\"".format(mode_start, iTel, floop))
+            wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "HOAcqDisturb.CYCLES\ 1")
+            wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "SETUP", "HOAcqDisturb.START_AT_FC\ 0")
 
 
     # Start recording on IRIS
