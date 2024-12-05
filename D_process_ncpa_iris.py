@@ -185,7 +185,7 @@ def extract_ncpa_iris_SEQ(cube_1ut, nZ, nRtcMod, nRtcPause, modAmp, repeat):
 # MAIN
 # =============================================================================
 
-def D_process_ncpa_iris(tel, mode_start, mode_end, repeat, floop, name_acquisition, timepermode, silent, temp_folder, sequence)
+def D_process_ncpa_iris(tel, mode_start, mode_end, repeat, floop, name_acquisition, timepermode, silent, temp_folder, sequence):
     if tel==0: #all UTs measurements
        telescopes = [1,2,3,4]
        ut_str = "1234"
@@ -279,8 +279,8 @@ def D_process_ncpa_iris(tel, mode_start, mode_end, repeat, floop, name_acquisiti
             elif (tel in [1,2,3,4]) and ncpa_tot.shape[0]==1: #one UT measurement
                 fig, axarr = plt.subplots(1, 1, figsize=(8,6))
                 for iui in range(ncpa_tot.shape[1]):
-                    axarr.ravel()[indTel].plot(iZs, ncpa_tot[0][iui]*1e3, '.-')
-                axarr.ravel()[indTel].plot(iZs, ncpa_tot[0].mean(0)*1e3, '.-',lw=3,color='k',label="Average")
+                    axarr.plot(iZs, ncpa_tot[0][iui]*1e3, '.-')
+                axarr.plot(iZs, ncpa_tot[0].mean(0)*1e3, '.-',lw=3,color='k',label="Average")
                 axarr.set_xlabel('Noll number')
                 axarr.set_ylabel('NCPA [nmRMS]')
                 axarr.set_title(filename)

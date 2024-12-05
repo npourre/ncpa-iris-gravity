@@ -184,7 +184,7 @@ def extract_ncpa_grav_SEQ(cube_unbiased, nZ, nRtcMod, nRtcPause, modAmp, repeat)
 # Main
 # =============================================================================
 
-def D_process_ncpa_grav(mode_start, mode_end, repeat, floop, name_acquisition, timepermode, silent, temp_folder, sequence)
+def D_process_ncpa_grav(mode_start, mode_end, repeat, floop, name_acquisition, timepermode, silent, temp_folder, sequence):
     if sequence == 'PAR':
         iZs = np.arange(mode_start, mode_end+1)
         nZ = len(iZs)  # Number of modes

@@ -3,11 +3,11 @@ import time
 import ccs
 import vlti
 
-def C_modulation_iris(tel, mode_start, mode_end, repeat, sequence, floop, name_acquisition, duration, bck)
+def C_modulation_iris(tel, mode_start, mode_end, repeat, sequence, floop, name_acquisition, duration, bck):
     if tel==0: #all UTs measurements
         telescopes = [1,2,3,4]
         ut_str = "1234"
-    elif args.tel in [1,2,3,4]: #one UT measurement
+    elif tel in [1,2,3,4]: #one UT measurement
         telescopes = [tel]
         ut_str = str(tel)
     else:
@@ -23,7 +23,7 @@ def C_modulation_iris(tel, mode_start, mode_end, repeat, sequence, floop, name_a
 
     dit = ccs.DbRead("@waral:Appl_data:ARAL:IRIS:iracq:exposure.DIT")
     framedit = dit + 0.0006 #empirical readtime
-    nDit = int(args.duration/framedit)
+    nDit = int(duration/framedit)
 
     iss_ssh = vlti.ssh("iss@wvgvlti")
 
@@ -32,7 +32,7 @@ def C_modulation_iris(tel, mode_start, mode_end, repeat, sequence, floop, name_a
         waral.send("''", "iracqServer", "SETUP", ",,DET.NDIT\ {0}".format(100))
         waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
         waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming")
-        tStart = args.name_acquisition.split('_')[1]
+        tStart = name_acquisition.split('_')[1]
         waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ IrisNcpa_{0}_bckg".format(tStart))
         # send STS offsets to take a dark
         for iTel in telescopes:
@@ -53,7 +53,7 @@ def C_modulation_iris(tel, mode_start, mode_end, repeat, sequence, floop, name_a
     waral.send("''", "iracqServer", "SETUP", ",,DET.NDIT\ {0}".format(nDit))
     waral.send("''", "iracqServer", "SETUP", ",,DET.FILE.CUBE.ST\ T")
     waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAMING.TYPE\ Request-Naming")
-    waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ {0}".format(args.name_acquisition))
+    waral.send("''", "iracqServer", "SETUP", ",,DET.EXP.NAME\ {0}".format(name_acquisition))
 
     # Prepare GPAO(s)
     if sequence == 'PAR':
@@ -79,7 +79,6 @@ def C_modulation_iris(tel, mode_start, mode_end, repeat, sequence, floop, name_a
         wgpNao = vlti.ssh("gpao{0}@wgp{0}ao".format(iTel))
         wgpNao.send("wgp{0}sgw".format(iTel), "spaccsServer", "EXEC", "HOAcqDisturb.run")
 
-    # Wait for the duration of the measurement
-    #time.sleep(args.duration)
+
 
 
