@@ -100,6 +100,7 @@ if __name__ == '__main__':
     parser.add_argument('--user_input','-u', type=int,default=1 , help="Ask for user validation to apply ncpa. 0/1")
     parser.add_argument('--psf_display','-p', type=int,default=0 , help="Show IRIS PSF before and after correction. 0/1")
     parser.add_argument('--silent','-s', type=int,default=0 , help="Prevent popups. 0/1")
+    parser.add_argument('--gain','-g', type=float,default=0.7 , help="Gain when we apply NCPA in PAR mode")
     args = parser.parse_args()
     
     temp_folder = '/vltuser/iss/temp_ncpa/'
@@ -170,7 +171,7 @@ if __name__ == '__main__':
                 if (time.time()-start_time) > timeout_time:
                     raise RuntimeError('Maximal waiting time reached')
             ### APPLY NCPA ###
-            E_apply_ncpa(args.tel, args.mode_start, args.mode_end, name_acquisition, args.sequence, args.user_input, temp_folder)
+            E_apply_ncpa(args.tel, args.mode_start, args.mode_end, name_acquisition, args.sequence, args.user_input, temp_folder,args.gain)
             time.sleep(1)
             if args.psf_display==1:
                 iris_acquisition(3,'IrisAcq_aftercorr_{0}'.format(tStart))
@@ -213,7 +214,7 @@ if __name__ == '__main__':
                     if (time.time()-start_time) > timeout_time:
                         raise RuntimeError('Maximal waiting time reached')
                 ### APPLY NCPA ###
-                E_apply_ncpa(args.tel, mode, 0, name_acquisition, args.sequence, args.user_input, temp_folder)
+                E_apply_ncpa(args.tel, mode, 0, name_acquisition, args.sequence, args.user_input, temp_folder, 1.)
                 time.sleep(1)
                 if args.psf_display==1:
                     iris_acquisition(3,'IrisAcq_aftercorr_{0}'.format(tStart))
@@ -257,7 +258,7 @@ if __name__ == '__main__':
                     raise RuntimeError('Maximal waiting time reached')
             np.save(os.path.join(temp_folder,'names_acqs.npy'),np.array(names_acqs))
             ### APPLY NCPA ###
-            E_apply_ncpa(args.tel, args.mode_start, args.mode_end, name_acquisition, args.sequence, args.user_input, temp_folder)
+            E_apply_ncpa(args.tel, args.mode_start, args.mode_end, name_acquisition, args.sequence, args.user_input, temp_folder, args.gain)
             time.sleep(1)
 
         elif args.sequence=="SEQ": #one acquisition with "repeat" of all the modes
@@ -287,7 +288,7 @@ if __name__ == '__main__':
                     if (time.time()-start_time) > timeout_time:
                         raise RuntimeError('Maximal waiting time reached')
                 ### APPLY NCPA ###
-                E_apply_ncpa(args.tel, mode, 0, name_acquisition, args.sequence, args.user_input, temp_folder)
+                E_apply_ncpa(args.tel, mode, 0, name_acquisition, args.sequence, args.user_input, temp_folder, 1.)
             np.save(os.path.join(temp_folder,'names_acqs.npy'),np.array(names_acqs))
         else:
             raise ValueError('Sequence argument is not SEQ and not PAR.')

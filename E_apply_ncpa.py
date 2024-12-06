@@ -59,16 +59,14 @@ def apply_offset_SEQ(ncpa_offset, indTel, noll, user):
         wgpNao.send("wgp{0}ao".format(indTel+1), "gpoControl", "SETWF", "\"-type REL -modes {0}  \"".format(modes_str),verbose=True)
 
 
-def E_apply_ncpa(tel, mode_start, mode_end, name_acquisition, sequence, user_input, temp_folder):
+def E_apply_ncpa(tel, mode_start, mode_end, name_acquisition, sequence, user_input, temp_folder, gain):
     tStart = name_acquisition.split('_')[1]
     #get the last NCPA file
     ncpa_file = sorted(glob.glob(os.path.join(temp_folder,'NCPA_*{0}*.npy'.format(tStart))))[-1]
     print('Applying {0} '.format(ncpa_file))
     ncpas = -np.load(ncpa_file)
 
-
-    ncpas = np.array(ncpas).mean(1) #average on the different repetitions
-
+    ncpas = np.array(ncpas).mean(1) * gain #average on the different repetitions
 
     # Prepare GPAO(s)
     if sequence == 'PAR':

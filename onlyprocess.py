@@ -108,6 +108,7 @@ if __name__ == '__main__':
     for i_n, nam in enumerate(recorded_names):
         print(f'{i_n} : {nam}')
     choice = input('Which file to process?')
+    choice = int(choice)
     tStart = recorded_names[choice].split('_')[1]
     if args.inst == "IRIS":
         if args.sequence=="PAR": #one acquisition with "repeat" of all the modes

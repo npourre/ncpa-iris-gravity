@@ -28,26 +28,19 @@ if __name__ == '__main__':
     # Move the STS offsets from Guide to Align to allow for IRIS guiding
     iss_ssh = vlti.ssh("iss@wvgvlti")
     ccs.CcsInit(name='iris_prepare.py')
-    for iTel in telescopes:
-        guideU = ccs.DbRead(f"@wvgvlti:Appl_data:VLTI:subSystems:wop{iTel}sts.fsm1GuideU") 
-        guideW = ccs.DbRead(f"@wvgvlti:Appl_data:VLTI:subSystems:wop{iTel}sts.fsm1GuideW") 
-        # Put in Align offset
-        iss_ssh.send(f"wop{iTel}sts", "pscsifControl", "ALIFSTS", f"0,{guideU},0,{guideW}") 
-        # Absolute 0 on Guiding offsets
-        iss_ssh.send(f"wop{iTel}sts", "pscsifControl", "SETGFSM", f"0,0,0,0") 
-        #Start labguiding
-    iss_ssh.send("''", 'issifControl', 'STRTLAG', 'AS_SUCH') 
-    time.sleep(5)
+
     
 
     waral = vlti.ssh("aral@waral")
-    waral.send("''", "iracqServer", "FRAME", "-name\ DIT\ -gen\ T\ -store\ T",verbose=True)
+    """waral.send("''", "iracqServer", "FRAME", "-name\ DIT\ -gen\ T\ -store\ T",verbose=True)
     waral.send("''", "iracqServer", "SETUP", ",,DET.WIN.ST\ 1")
     waral.send("''", "iracqServer", "SETUP", f",,DET.WIN.STRX\ {64-args.win_size//2}")
     waral.send("''", "iracqServer", "SETUP", f",,DET.WIN.STRY\ {64-args.win_size//2}")
     waral.send("''", "iracqServer", "SETUP", f",,DET.WIN.NX\ {args.win_size}")
-    waral.send("''", "iracqServer", "SETUP", f",,DET.WIN.NY\ {args.win_size}")
+    waral.send("''", "iracqServer", "SETUP", f",,DET.WIN.NY\ {args.win_size}")"""
     waral.send("''", "iracqServer", "SETUP", ",,DET.DIT\ 0")
+
+    waral.send("''", "arifiris", "STRTDET", ",,DET.startX\ 50,DET.startY\ 52")
 
     # adjust beacons power
     for iTel in telescopes:
